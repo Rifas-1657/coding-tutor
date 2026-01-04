@@ -1,0 +1,12 @@
+.error-stats {
+  min-height: 200px;
+}
+
+.error-stats-placeholder {
+  padding: 40px 20px;
+  text-align: center;
+  color: #858585;
+  font-style: italic;
+}
+
+

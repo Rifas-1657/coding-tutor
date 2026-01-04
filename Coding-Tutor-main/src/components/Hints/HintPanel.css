@@ -1,0 +1,35 @@
+.hint-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #1e1e1e;
+  overflow-y: auto;
+}
+
+.hint-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #3e3e42;
+  background-color: #252526;
+}
+
+.hint-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.hint-list {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.hint-placeholder {
+  padding: 40px 20px;
+  text-align: center;
+  color: #858585;
+  font-style: italic;
+}
+
+

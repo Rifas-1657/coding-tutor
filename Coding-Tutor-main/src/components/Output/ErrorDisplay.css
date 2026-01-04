@@ -1,0 +1,59 @@
+.error-display {
+  border-top: 1px solid #3e3e42;
+  background-color: #2d2d2d;
+  padding: 10px;
+}
+
+.error-item {
+  margin-bottom: 12px;
+  padding: 8px;
+  background-color: #3a1d1d;
+  border-left: 3px solid #f48771;
+  border-radius: 2px;
+}
+
+.error-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.error-line {
+  font-weight: 600;
+  color: #f48771;
+  font-size: 13px;
+}
+
+.error-badge {
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.error-badge.error {
+  background-color: #f48771;
+  color: #1e1e1e;
+}
+
+.error-badge.warning {
+  background-color: #cca700;
+  color: #1e1e1e;
+}
+
+.error-badge.note {
+  background-color: #569cd6;
+  color: #1e1e1e;
+}
+
+.error-message {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #d4d4d4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+

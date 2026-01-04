@@ -1,0 +1,6 @@
+# Place bundled compilers here for production builds
+# - mingw/ (MinGW for C/C++)
+# - python/ (Embeddable Python)
+# - jdk/ (OpenJDK)
+
+

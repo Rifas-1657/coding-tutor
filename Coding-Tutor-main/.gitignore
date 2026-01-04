@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+backend/__pycache__/
+backend/.venv/
+backend/venv/
+backend/env/
+
+# Build outputs
+build/
+dist/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+
+# Persistent storage (student files)
+backend/storage/user_files/*
+!backend/storage/user_files/.gitkeep
+
+# Electron
+*.asar
+
+# Testing
+coverage/
+

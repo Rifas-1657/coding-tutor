@@ -1,0 +1,63 @@
+.resizable-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.resizable-container.terminal-visible {
+  /* Terminal is visible */
+}
+
+.editor-area {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: flex-basis 0.1s ease-out;
+}
+
+.resize-divider {
+  height: 5px;
+  background-color: #252526;
+  border-top: 1px solid #3e3e42;
+  border-bottom: 1px solid #3e3e42;
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  transition: background-color 0.2s;
+}
+
+.resize-divider:hover {
+  background-color: #2d2d2d;
+}
+
+.resize-divider.dragging {
+  background-color: #007acc;
+}
+
+.resize-handle {
+  width: 40px;
+  height: 3px;
+  background-color: #3e3e42;
+  border-radius: 2px;
+  transition: background-color 0.2s;
+}
+
+.resize-divider:hover .resize-handle {
+  background-color: #007acc;
+}
+
+.resize-divider.dragging .resize-handle {
+  background-color: #ffffff;
+}
+
+.terminal-area {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: flex-basis 0.1s ease-out;
+}
+
