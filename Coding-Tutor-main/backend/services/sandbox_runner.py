@@ -50,19 +50,19 @@ class DockerSandboxRunner:
         try:
             if language == "python":
                 filename = "main.py"
-                run_cmd = "python3 -u /sandbox/main.py"
+                run_cmd = f"python3 -u /sandbox/main.py << 'EOF'\n{stdin_data}\nEOF"
 
             elif language == "c":
                 filename = "main.c"
-                run_cmd = "gcc /sandbox/main.c -o /sandbox/a.out && /sandbox/a.out"
+                run_cmd = f"gcc /sandbox/main.c -o /sandbox/a.out && /sandbox/a.out << 'EOF'\n{stdin_data}\nEOF"
 
             elif language == "cpp":
                 filename = "main.cpp"
-                run_cmd = "g++ /sandbox/main.cpp -o /sandbox/a.out && /sandbox/a.out"
+                run_cmd = f"g++ /sandbox/main.cpp -o /sandbox/a.out && /sandbox/a.out << 'EOF'\n{stdin_data}\nEOF"
 
             elif language == "java":
                 filename = "Main.java"
-                run_cmd = "javac /sandbox/Main.java && java -cp /sandbox Main"
+                run_cmd = f"javac /sandbox/Main.java && java -cp /sandbox Main << 'EOF'\n{stdin_data}\nEOF"
                 # Ensure code has public class Main
                 if 'public class Main' not in code and 'class Main' not in code:
                     if 'public class' not in code:
@@ -79,7 +79,6 @@ class DockerSandboxRunner:
                 "--network", "none",
                 "--memory", "128m",
                 "--cpus", "0.5",
-                "-i",
                 "-v", f"{temp_dir}:/sandbox",
                 self.SANDBOX_IMAGE,
                 "sh", "-c", run_cmd
@@ -87,7 +86,6 @@ class DockerSandboxRunner:
 
             result = subprocess.run(
                 docker_cmd,
-                input=stdin_data,
                 text=True,
                 capture_output=True,
                 timeout=self.TIMEOUT
