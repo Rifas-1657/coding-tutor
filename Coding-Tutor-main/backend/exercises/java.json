@@ -1,0 +1,99 @@
+[
+  {
+    "id": "ex1",
+    "title": "Fibonacci Series",
+    "description": "Write a java program to find the Fibonacci series using recursive and non-recursive functions.",
+    "testcases": [
+      {
+        "input": "5",
+        "expected_output": "Recursive: 0 1 1 2 3\nNon-Recursive: 0 1 1 2 3",
+        "description": "Fibonacci series"
+      }
+    ],
+    "subject": "Java"
+  },
+  {
+    "id": "ex2",
+    "title": "Matrix Multiplication",
+    "description": "Write a java program to multiply two given matrices.",
+    "testcases": [
+      {
+        "input": "2\n2\n1\n2\n3\n4\n5\n6\n7\n8",
+        "expected_output": "19 22\n43 50",
+        "description": "2x2 matrix multiplication"
+      }
+    ],
+    "subject": "Java"
+  },
+  {
+    "id": "ex3",
+    "title": "Method Overloading",
+    "description": "Write a java program for Method overloading and Constructor overloading.",
+    "testcases": [
+      {
+        "input": "5",
+        "expected_output": "Method overloading demonstrated",
+        "description": "Overloading example"
+      }
+    ],
+    "subject": "Java"
+  },
+  {
+    "id": "ex4",
+    "title": "Employee Details",
+    "description": "Write a java program to display the employee details using Scanner class.",
+    "testcases": [
+      {
+        "input": "John\n25\n50000",
+        "expected_output": "Name: John\nAge: 25\nSalary: 50000",
+        "description": "Employee details"
+      }
+    ],
+    "subject": "Java"
+  },
+  {
+    "id": "ex5",
+    "title": "Palindrome Check",
+    "description": "Write a java program that checks whether a given string is palindrome or not.",
+    "testcases": [
+      {
+        "input": "madam",
+        "expected_output": "Palindrome",
+        "description": "Palindrome string"
+      },
+      {
+        "input": "hello",
+        "expected_output": "Not Palindrome",
+        "description": "Non-palindrome"
+      }
+    ],
+    "subject": "Java"
+  },
+  {
+    "id": "ex6",
+    "title": "Abstract Class",
+    "description": "Write a java program to represent Abstract class with example.",
+    "testcases": [
+      {
+        "input": "test",
+        "expected_output": "Abstract class demonstrated",
+        "description": "Abstract class"
+      }
+    ],
+    "subject": "Java"
+  },
+  {
+    "id": "ex7",
+    "title": "Interface",
+    "description": "Write a java program to implement Interface using extends keyword.",
+    "testcases": [
+      {
+        "input": "test",
+        "expected_output": "Interface demonstrated",
+        "description": "Interface example"
+      }
+    ],
+    "subject": "Java"
+  }
+]
+

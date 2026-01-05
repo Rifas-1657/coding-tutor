@@ -109,10 +109,14 @@ class OfflineExecutor:
         """Read stdout line by line in background thread."""
         try:
             if self.process and self.process.stdout:
+                # Use readline for line-buffered reading
                 for line in iter(self.process.stdout.readline, ''):
                     if not line:
                         break
-                    self.stdout_queue.put(line.rstrip('\n\r'))
+                    # Remove trailing newlines but keep the line content
+                    cleaned_line = line.rstrip('\n\r')
+                    if cleaned_line:  # Only queue non-empty lines
+                        self.stdout_queue.put(cleaned_line)
         except Exception:
             pass
         finally:
@@ -156,13 +160,14 @@ class OfflineExecutor:
             cmd = self._get_execution_command(language, code_file)
             
             # Start process with interactive stdin/stdout
+            # Use line buffered mode for interactive I/O
             self.process = subprocess.Popen(
                 cmd,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
-                bufsize=1,  # Line buffered
+                bufsize=1,  # Line buffered for interactive programs
                 cwd=os.path.dirname(code_file) if language != 'python' else None
             )
             
@@ -208,16 +213,31 @@ class OfflineExecutor:
         Returns:
             dict with keys: success, message
         """
-        if not self.is_running or not self.process or not self.process.stdin:
+        if not self.is_running or not self.process:
             return {"success": False, "message": "No active execution"}
         
+        if not self.process.stdin:
+            return {"success": False, "message": "Process stdin not available"}
+        
         try:
-            # Send input with newline
-            self.process.stdin.write(input_data + '\n')
+            # Check if process is still running
+            if self.process.poll() is not None:
+                return {"success": False, "message": "Process has terminated"}
+            
+            # Send input with newline and ensure it's flushed immediately
+            input_str = str(input_data) + '\n'
+            self.process.stdin.write(input_str)
             self.process.stdin.flush()
+            
+            # Small delay to ensure input is processed
+            import time
+            time.sleep(0.01)  # 10ms delay
+            
             return {"success": True, "message": "Input sent"}
+        except BrokenPipeError:
+            return {"success": False, "message": "Process stdin pipe is closed"}
         except Exception as e:
-            return {"success": False, "message": str(e)}
+            return {"success": False, "message": f"Error sending input: {str(e)}"}
     
     def read_output(self, timeout: float = 0.1) -> Dict[str, Any]:
         """

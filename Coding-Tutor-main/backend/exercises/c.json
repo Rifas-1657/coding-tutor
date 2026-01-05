@@ -1,0 +1,368 @@
+[
+  {
+    "id": "ex1",
+    "title": "Area of Triangle",
+    "description": "Write a C program to find the area of a triangle.",
+    "testcases": [
+      {
+        "input": "5\n6",
+        "expected_output": "15.00",
+        "description": "Base=5, Height=6"
+      },
+      {
+        "input": "10\n8",
+        "expected_output": "40.00",
+        "description": "Base=10, Height=8"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex2",
+    "title": "Total and Average Percentage",
+    "description": "Write a C program to find the total and average percentage obtained by a student for 6 subjects.",
+    "testcases": [
+      {
+        "input": "85\n90\n78\n92\n88\n95",
+        "expected_output": "Total: 528\nAverage: 88.00",
+        "description": "6 subject marks"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex3",
+    "title": "Digit Separation",
+    "description": "Read a 3-digit number and output as '1 Hundreds 7 Tens 2 Units' for 172 and print the reverse of the number.",
+    "testcases": [
+      {
+        "input": "172",
+        "expected_output": "1 Hundreds 7 Tens 2 Units\nReverse: 271",
+        "description": "3-digit number"
+      },
+      {
+        "input": "456",
+        "expected_output": "4 Hundreds 5 Tens 6 Units\nReverse: 654",
+        "description": "Another 3-digit number"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex4",
+    "title": "Vowel Check",
+    "description": "Check whether a given character is vowel or not using switch-case.",
+    "testcases": [
+      {
+        "input": "a",
+        "expected_output": "Vowel",
+        "description": "Lowercase vowel"
+      },
+      {
+        "input": "E",
+        "expected_output": "Vowel",
+        "description": "Uppercase vowel"
+      },
+      {
+        "input": "b",
+        "expected_output": "Not a vowel",
+        "description": "Consonant"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex5",
+    "title": "Age Input",
+    "description": "Write a C program to read age from user and display it.",
+    "testcases": [
+      {
+        "input": "25",
+        "expected_output": "You are 25 years old.",
+        "description": "Age 25"
+      },
+      {
+        "input": "18",
+        "expected_output": "You are 18 years old.",
+        "description": "Age 18"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex6",
+    "title": "Sum of n Numbers",
+    "description": "Find sum of n numbers using for, while, do-while statements.",
+    "testcases": [
+      {
+        "input": "5\n1\n2\n3\n4\n5",
+        "expected_output": "Sum: 15",
+        "description": "Sum of first 5 numbers"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex7",
+    "title": "String Functions",
+    "description": "Perform various string handling functions: strlen, strcpy, strcat, strcmp.",
+    "testcases": [
+      {
+        "input": "hello\nworld",
+        "expected_output": "Length: 5\nCopied: hello\nConcatenated: helloworld\nComparison: -15",
+        "description": "String operations"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex8",
+    "title": "Remove Non-Alphabets",
+    "description": "Remove all characters in a string except alphabets.",
+    "testcases": [
+      {
+        "input": "Hello123World!",
+        "expected_output": "HelloWorld",
+        "description": "String with numbers and special chars"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex9",
+    "title": "Array Min Max",
+    "description": "Find the smallest and largest element in an array.",
+    "testcases": [
+      {
+        "input": "5\n10\n5\n20\n15\n8",
+        "expected_output": "Smallest: 5\nLargest: 20",
+        "description": "Array of 5 numbers"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex10",
+    "title": "Matrix Operations",
+    "description": "Perform matrix addition, subtraction and multiplication.",
+    "testcases": [
+      {
+        "input": "2\n2\n1\n2\n3\n4\n5\n6\n7\n8",
+        "expected_output": "Addition:\n6 8\n10 12\nSubtraction:\n-4 -4\n-4 -4\nMultiplication:\n19 22\n43 50",
+        "description": "2x2 matrices"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex11",
+    "title": "Search Algorithms",
+    "description": "Search a given number using linear and binary search.",
+    "testcases": [
+      {
+        "input": "5\n1\n2\n3\n4\n5\n3",
+        "expected_output": "Linear Search: Found at index 2\nBinary Search: Found at index 2",
+        "description": "Search for 3 in sorted array"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex12",
+    "title": "Sorting Algorithms",
+    "description": "Arrange the given set of numbers using bubble sort, selection sort and insertion sort.",
+    "testcases": [
+      {
+        "input": "5\n5\n2\n8\n1\n9",
+        "expected_output": "Bubble Sort: 1 2 5 8 9\nSelection Sort: 1 2 5 8 9\nInsertion Sort: 1 2 5 8 9",
+        "description": "Sort 5 numbers"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex13",
+    "title": "Factorial",
+    "description": "Find the factorial of a given number using function and recursion.",
+    "testcases": [
+      {
+        "input": "5",
+        "expected_output": "Factorial: 120",
+        "description": "Factorial of 5"
+      },
+      {
+        "input": "4",
+        "expected_output": "Factorial: 24",
+        "description": "Factorial of 4"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex14",
+    "title": "Swap Numbers",
+    "description": "Swap two numbers using call by value and call by reference.",
+    "testcases": [
+      {
+        "input": "10\n20",
+        "expected_output": "After swap: 20 10",
+        "description": "Swap 10 and 20"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex15",
+    "title": "Array Sum with Pointers",
+    "description": "Find the sum of an integer array using pointers.",
+    "testcases": [
+      {
+        "input": "5\n1\n2\n3\n4\n5",
+        "expected_output": "Sum: 15",
+        "description": "Sum of array using pointers"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex16",
+    "title": "Max Element with Pointers",
+    "description": "Find the maximum element in an integer array using pointers.",
+    "testcases": [
+      {
+        "input": "5\n10\n5\n20\n15\n8",
+        "expected_output": "Maximum: 20",
+        "description": "Max element using pointers"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex17",
+    "title": "Salary Slip",
+    "description": "Generate salary slip of employees using structures and pointers.",
+    "testcases": [
+      {
+        "input": "John\n10000\n5000\n2000",
+        "expected_output": "Employee: John\nBasic: 10000\nHRA: 5000\nDA: 2000\nTotal: 17000",
+        "description": "Employee salary calculation"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex18",
+    "title": "File Display",
+    "description": "Display the contents of the file on the monitor screen.",
+    "testcases": [
+      {
+        "input": "test.txt\nHello World",
+        "expected_output": "File contents:\nHello World",
+        "description": "Display file contents"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex19",
+    "title": "File Operations",
+    "description": "Getting the input from the keyboard and retrieve the contents of the file using file operation commands.",
+    "testcases": [
+      {
+        "input": "data.txt\nSample text",
+        "expected_output": "File written and read successfully",
+        "description": "File write and read"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex20",
+    "title": "Merge Files",
+    "description": "Create two files with a set of values. Merge the two file contents to form a single file.",
+    "testcases": [
+      {
+        "input": "file1.txt\nHello\nfile2.txt\nWorld",
+        "expected_output": "Merged: HelloWorld",
+        "description": "Merge two files"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex21",
+    "title": "Command Line Arguments",
+    "description": "Pass the parameter using command line arguments.",
+    "testcases": [
+      {
+        "input": "arg1 arg2 arg3",
+        "expected_output": "Arguments: arg1 arg2 arg3",
+        "description": "Command line arguments"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex22",
+    "title": "Factorial Function",
+    "description": "Find the factorial of a given number using Functions in C.",
+    "testcases": [
+      {
+        "input": "5",
+        "expected_output": "Factorial: 120",
+        "description": "Factorial using function"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex23",
+    "title": "Palindrome Check",
+    "description": "Check whether the given string is Palindrome or not.",
+    "testcases": [
+      {
+        "input": "madam",
+        "expected_output": "Palindrome",
+        "description": "Palindrome string"
+      },
+      {
+        "input": "hello",
+        "expected_output": "Not Palindrome",
+        "description": "Non-palindrome string"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex24",
+    "title": "Prime Check",
+    "description": "Check whether the given value is Prime or not.",
+    "testcases": [
+      {
+        "input": "7",
+        "expected_output": "Prime",
+        "description": "Prime number"
+      },
+      {
+        "input": "10",
+        "expected_output": "Not Prime",
+        "description": "Non-prime number"
+      }
+    ],
+    "subject": "c_lab_manual"
+  },
+  {
+    "id": "ex25",
+    "title": "Replace Zeros with Ones",
+    "description": "Replace all 0's with 1's in a Number.",
+    "testcases": [
+      {
+        "input": "10203",
+        "expected_output": "11213",
+        "description": "Replace 0s with 1s"
+      }
+    ],
+    "subject": "c_lab_manual"
+  }
+]
+

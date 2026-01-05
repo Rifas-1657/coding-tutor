@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ex1",
+    "title": "Sum of Digits",
+    "description": "Write a C++ program to find the sum of individual digits of a positive integer.",
+    "testcases": [
+      {
+        "input": "123",
+        "expected_output": "Sum: 6",
+        "description": "Sum of digits of 123"
+      }
+    ],
+    "subject": "C++"
+  },
+  {
+    "id": "ex2",
+    "title": "Prime Numbers",
+    "description": "Write a C++ program to generate all the prime numbers between 1 and n, where n is a value supplied by the user.",
+    "testcases": [
+      {
+        "input": "10",
+        "expected_output": "2 3 5 7",
+        "description": "Primes up to 10"
+      }
+    ],
+    "subject": "C++"
+  },
+  {
+    "id": "ex3",
+    "title": "Class Student",
+    "description": "Write a Program to Implement a Class STUDENT with data members and member functions.",
+    "testcases": [
+      {
+        "input": "John\n85\n90\n78",
+        "expected_output": "Name: John\nTotal: 253\nAverage: 84.33",
+        "description": "Student class"
+      }
+    ],
+    "subject": "C++"
+  },
+  {
+    "id": "ex4",
+    "title": "Operator Overloading",
+    "description": "Write a Program to Demonstrate Operator Overloading and Function Overloading.",
+    "testcases": [
+      {
+        "input": "5\n3",
+        "expected_output": "Sum: 8",
+        "description": "Operator overloading"
+      }
+    ],
+    "subject": "C++"
+  },
+  {
+    "id": "ex5",
+    "title": "Inheritance",
+    "description": "Write C++ programs that illustrate Single, Multiple, Multi-level, and Hierarchical inheritance.",
+    "testcases": [
+      {
+        "input": "test",
+        "expected_output": "Inheritance demonstrated",
+        "description": "Inheritance example"
+      }
+    ],
+    "subject": "C++"
+  }
+]
+

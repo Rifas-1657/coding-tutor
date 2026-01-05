@@ -1,7 +1,7 @@
 """
 Docker-based sandbox runner for secure code execution.
 All code execution happens inside isolated Docker containers using Docker CLI.
-Non-interactive execution model (like CodeChef/HackerRank).
+Non-interactive execution model: stdin is closed immediately to prevent hanging.
 """
 
 import subprocess
@@ -14,7 +14,7 @@ class DockerSandboxRunner:
     """Execute code in isolated Docker containers using Docker CLI."""
     
     SANDBOX_IMAGE = "coding-tutor-sandbox:latest"
-    TIMEOUT = 30
+    TIMEOUT = 120  # Increased for advanced programs
 
     def __init__(self):
         """Initialize DockerSandboxRunner."""
@@ -36,12 +36,13 @@ class DockerSandboxRunner:
     def run_code(self, language, code, stdin_data=""):
         """
         Execute code in Docker container using Docker CLI.
-        Non-interactive execution: input provided upfront, output returned.
+        Non-interactive execution: stdin is closed immediately to prevent hanging.
+        Programs using scanf/cin/input() will receive empty input or EOF.
         
         Args:
             language: One of 'python', 'c', 'cpp', 'java'
             code: Source code to execute
-            stdin_data: Input data for program (provided upfront, can be empty string)
+            stdin_data: Input data for program (optional, defaults to empty)
         
         Returns:
             dict with keys: success, output, error
@@ -50,23 +51,34 @@ class DockerSandboxRunner:
         try:
             if language == "python":
                 filename = "main.py"
-                run_cmd = f"python3 -u /sandbox/main.py << 'EOF'\n{stdin_data}\nEOF"
+                if stdin_data:
+                    run_cmd = f"python3 -u /sandbox/main.py << 'EOF'\n{stdin_data}\nEOF"
+                else:
+                    run_cmd = "python3 -u /sandbox/main.py < /dev/null"
 
             elif language == "c":
                 filename = "main.c"
-                run_cmd = f"gcc /sandbox/main.c -o /sandbox/a.out && /sandbox/a.out << 'EOF'\n{stdin_data}\nEOF"
+                if stdin_data:
+                    run_cmd = f"gcc /sandbox/main.c -o /sandbox/a.out && /sandbox/a.out << 'EOF'\n{stdin_data}\nEOF"
+                else:
+                    run_cmd = "gcc /sandbox/main.c -o /sandbox/a.out && /sandbox/a.out < /dev/null"
 
             elif language == "cpp":
                 filename = "main.cpp"
-                run_cmd = f"g++ /sandbox/main.cpp -o /sandbox/a.out && /sandbox/a.out << 'EOF'\n{stdin_data}\nEOF"
+                if stdin_data:
+                    run_cmd = f"g++ /sandbox/main.cpp -o /sandbox/a.out && /sandbox/a.out << 'EOF'\n{stdin_data}\nEOF"
+                else:
+                    run_cmd = "g++ /sandbox/main.cpp -o /sandbox/a.out && /sandbox/a.out < /dev/null"
 
             elif language == "java":
                 filename = "Main.java"
-                run_cmd = f"javac /sandbox/Main.java && java -cp /sandbox Main << 'EOF'\n{stdin_data}\nEOF"
-                # Ensure code has public class Main
                 if 'public class Main' not in code and 'class Main' not in code:
                     if 'public class' not in code:
                         code = f'public class Main {{\n    public static void main(String[] args) {{\n        {code}\n    }}\n}}'
+                if stdin_data:
+                    run_cmd = f"javac /sandbox/Main.java && java -cp /sandbox Main << 'EOF'\n{stdin_data}\nEOF"
+                else:
+                    run_cmd = "javac /sandbox/Main.java && java -cp /sandbox Main < /dev/null"
 
             else:
                 return {"success": False, "error": "Unsupported language"}
@@ -87,18 +99,36 @@ class DockerSandboxRunner:
             result = subprocess.run(
                 docker_cmd,
                 text=True,
+                input=stdin_data if stdin_data else "",
                 capture_output=True,
-                timeout=self.TIMEOUT
+                timeout=self.TIMEOUT,
+                encoding='utf-8',
+                errors='replace'
             )
+
+            # Combine stdout and stderr for error messages
+            output = result.stdout.strip() if result.stdout else ""
+            error = result.stderr.strip() if result.stderr else ""
+            
+            # If return code is non-zero, include stderr in error
+            if result.returncode != 0:
+                if error:
+                    # Check if it's a compilation error
+                    if "error:" in error.lower() or "undefined" in error.lower() or "expected" in error.lower():
+                        error = f"Compilation Error: {error}"
+                    else:
+                        error = f"Runtime Error (Exit code {result.returncode}): {error}"
+                else:
+                    error = f"Program exited with error code {result.returncode}"
 
             return {
                 "success": result.returncode == 0,
-                "output": result.stdout.strip(),
-                "error": result.stderr.strip()
+                "output": output,
+                "error": error
             }
 
         except subprocess.TimeoutExpired:
-            return {"success": False, "error": "Execution timed out"}
+            return {"success": False, "error": "Execution timed out after 120 seconds. Your program may be waiting for input, running too long, or stuck in an infinite loop."}
 
         except Exception as e:
             return {"success": False, "error": str(e)}

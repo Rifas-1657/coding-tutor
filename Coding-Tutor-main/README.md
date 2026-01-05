@@ -1,161 +1,71 @@
-# Coding Tutor Desktop Application
+# Lab Practice System
 
-A desktop application built with Electron, React, and FastAPI that helps college students learn programming in lab environments. The app runs completely offline on basic lab PCs with minimal resources.
-
-## Features
-
-- **Multi-language Support**: C, C++, Python, and Java
-- **Code Editor**: Monaco Editor with syntax highlighting (same engine as VS Code)
-- **Code Execution**: Docker-based sandboxed execution with timeout protection and resource limits
-- **Intelligent Hints**: AI-powered hint generation based on error analysis
-- **File Operations**: Save and load code files
-- **Dashboard**: Track progress and statistics
-- **Offline First**: Works completely offline, no internet required
+Offline Docker sandbox execution system for lab exercises with RAG/LLM hint generation.
 
 ## Architecture
 
-The application uses a three-layer architecture:
+```
+lab-practice-system/
+├── backend/
+│   ├── sandbox/          # Docker execution
+│   ├── rag/              # RAG/LLM hint generation
+│   ├── exercises/        # Exercise JSON files (data-driven)
+│   ├── evaluator/        # Test case evaluation
+│   ├── stats/            # Statistics (counts only)
+│   ├── api/              # REST API endpoints
+│   └── main.py           # FastAPI application
+├── frontend/             # Simple HTML/JS frontend
+└── Lab/                  # Lab manual PDFs (for RAG indexing)
+```
 
-1. **Electron Main Process**: Manages the desktop window and starts the FastAPI backend
-2. **React Frontend**: Provides the user interface with Monaco Editor
-3. **FastAPI Backend**: Handles code execution, hint generation, and file operations
+## Features
 
-## Prerequisites
+- ✅ **Docker Sandbox Execution** - Isolated, secure code execution
+- ✅ **Non-Interactive Input** - Test cases injected upfront (no scanf/input() waiting)
+- ✅ **Test Case Evaluation** - Automatic test case comparison
+- ✅ **RAG/LLM Hints** - Conceptual hints from lab manuals or LLM
+- ✅ **Data-Driven Exercises** - All exercises in JSON files (no hardcoding)
+- ✅ **Statistics** - Tracks counts only (no code/input storage)
 
-- **Docker Desktop** (Required for code execution)
-- Node.js 16+ and npm
-- Python 3.8+
+## Setup
 
-**Note**: All compilers (gcc, g++, javac, python3) are now provided via Docker. No need to install them on your host machine.
-
-## Installation
-
-1. Clone the repository
-2. Install Node.js dependencies:
+1. **Install Dependencies:**
    ```bash
-   npm install
-   ```
-
-3. Install Python dependencies:
-   ```bash
-   cd backend
    pip install -r requirements.txt
    ```
 
-## Development
+2. **Build RAG Indexes:**
+   ```bash
+   cd backend/rag
+   python build_index.py
+   ```
 
-### Running the React Frontend (Development)
+3. **Start Backend:**
+   ```bash
+   cd backend
+   python -m uvicorn main:app --reload
+   ```
 
-```bash
-npm start
-```
+4. **Open Frontend:**
+   Open `frontend/index.html` in a browser
 
-This starts the React development server on `http://localhost:3000`
+## Usage Flow
 
-### Running the FastAPI Backend (Development)
+1. Select Programming Language
+2. Select Lab Exercise
+3. Write Code
+4. Click Run → Code executes in Docker with test cases
+5. If tests fail → Hint button appears
+6. Click Hint → Get conceptual hint (RAG-first, LLM-fallback)
 
-```bash
-cd backend
-python -m uvicorn main:app --reload
-```
+## Future-Proof Design
 
-This starts the FastAPI server on `http://localhost:8000`
+- **Exercises**: All in JSON files - update without code changes
+- **Lab Manuals**: PDFs in `Lab/` - rebuild indexes when updated
+- **No Hardcoding**: System adapts to new exercises automatically
 
-### Running the Electron App (Development)
+## Important Notes
 
-```bash
-npm run electron-dev
-```
-
-Or first build the React app, then run Electron:
-
-```bash
-npm run build
-npm run electron
-```
-
-## Building for Production
-
-### Windows
-
-```bash
-npm run build:win
-```
-
-This creates an NSIS installer in the `dist` directory.
-
-### macOS
-
-```bash
-npm run build:mac
-```
-
-This creates a DMG disk image.
-
-### Linux
-
-```bash
-npm run build:linux
-```
-
-This creates an AppImage.
-
-## Project Structure
-
-```
-coding-tutor/
-├── electron/          # Electron main process files
-│   ├── main.js       # Entry point, window management
-│   ├── preload.js    # Security bridge for IPC
-│   └── python-process.js  # Python subprocess management
-├── public/            # Static assets
-│   ├── index.html
-│   └── icon.png
-├── src/               # React application
-│   ├── components/    # React components
-│   │   ├── Editor/   # Code editor components
-│   │   ├── Controls/ # Control buttons
-│   │   ├── Output/   # Output display
-│   │   ├── Hints/    # Hint components
-│   │   └── Dashboard/ # Dashboard components
-│   ├── services/      # API and IPC services
-│   ├── App.js        # Main React component
-│   └── index.js      # React entry point
-├── backend/           # FastAPI backend
-│   ├── routers/      # API endpoints
-│   ├── services/     # Business logic (sandbox, hints)
-│   ├── models/       # Pydantic models
-│   └── main.py       # FastAPI app
-├── compilers/         # Bundled compilers (for production)
-│   ├── mingw/        # MinGW for C/C++
-│   ├── python/       # Python runtime
-│   └── jdk/          # OpenJDK for Java
-└── package.json      # Node.js dependencies and scripts
-```
-
-## Security
-
-The sandbox implementation includes multiple safety layers:
-
-- **Timeout Protection**: All code executions timeout after 5 seconds
-- **Directory Isolation**: Each execution runs in a temporary directory
-- **Resource Limits**: Memory and CPU limits (Linux)
-- **No Network Access**: Subprocess doesn't grant socket permissions
-- **Automatic Cleanup**: Temporary directories are always cleaned up
-
-## Supported Languages
-
-- **C**: GCC compiler
-- **C++**: G++ compiler
-- **Python**: Python 3 interpreter
-- **Java**: JDK (javac + java)
-
-## License
-
-This project is for educational purposes.
-
-## Contributing
-
-This is an educational project. Contributions and improvements are welcome!
-
-
+- **No File Storage**: Code execution is temporary, no files saved
+- **Non-Interactive**: All input comes from test cases (no keyboard input)
+- **Offline**: Works completely offline (Docker + Ollama LLM)

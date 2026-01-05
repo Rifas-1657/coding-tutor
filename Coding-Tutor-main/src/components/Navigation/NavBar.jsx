@@ -4,11 +4,14 @@ import TerminalMenu from './TerminalMenu';
 import RunMenu from './RunMenu';
 import HelpMenu from './HelpMenu';
 import LanguageSelector from '../Editor/LanguageSelector';
+import ExerciseSelector from '../Editor/ExerciseSelector';
 import './NavBar.css';
 
 const NavBar = ({ 
   language, 
   onLanguageChange,
+  exerciseId,
+  onExerciseChange,
   editorRef,
   onTerminalToggle,
   terminalVisible,
@@ -118,6 +121,11 @@ const NavBar = ({
         <LanguageSelector
           language={language}
           onLanguageChange={onLanguageChange}
+        />
+        <ExerciseSelector
+          language={language}
+          exerciseId={exerciseId}
+          onExerciseChange={onExerciseChange}
         />
       </div>
     </nav>

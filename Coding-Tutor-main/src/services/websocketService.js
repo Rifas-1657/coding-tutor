@@ -65,10 +65,17 @@ export class WebSocketExecutionService {
 
   sendInput(input) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      // Send input to the backend for interactive execution
       this.ws.send(JSON.stringify({
         type: 'input',
         content: input
       }));
+      console.log('Sent input to backend:', input);
+    } else {
+      console.error('WebSocket not connected, cannot send input');
+      if (this.onError) {
+        this.onError('Not connected to execution server');
+      }
     }
   }
 

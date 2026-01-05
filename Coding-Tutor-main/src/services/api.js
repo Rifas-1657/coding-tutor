@@ -1,8 +1,9 @@
 const API_BASE_URL = 'http://localhost:8000/api';
 
-export const runCode = async (code, language, inputData = null) => {
+// Sandboxed Practice System API
+export const runCode = async (code, language, exerciseId, userInput = '') => {
   try {
-    const response = await fetch(`${API_BASE_URL}/run-code`, {
+    const response = await fetch(`${API_BASE_URL}/run`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -10,7 +11,8 @@ export const runCode = async (code, language, inputData = null) => {
       body: JSON.stringify({
         code,
         language,
-        input_data: inputData || null,
+        exercise_id: exerciseId,
+        user_input: userInput || '',
       }),
     });
 
@@ -26,17 +28,61 @@ export const runCode = async (code, language, inputData = null) => {
   }
 };
 
-export const getHint = async (code, language, errorMessage = null) => {
+export const getExercises = async (language) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/get-hint`, {
+    // Normalize language to lowercase
+    const normalizedLang = language.toLowerCase();
+    const url = `${API_BASE_URL}/exercises/${normalizedLang}`;
+    console.log('Fetching exercises from:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      mode: 'cors',
+    });
+
+    console.log('Response status:', response.status);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('Exercises data received:', data);
+    console.log('Number of exercises:', Array.isArray(data) ? data.length : 'Not an array');
+    return data;
+  } catch (error) {
+    console.error('Error getting exercises:', error);
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    
+    // Check if it's a network error
+    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.name === 'TypeError') {
+      const errorMsg = 'Cannot connect to backend server.\n\nPlease ensure:\n1. Backend is running: python backend/main.py\n2. Backend is on http://localhost:8000\n3. Check browser console for details';
+      console.error('Network error:', errorMsg);
+      throw new Error(errorMsg);
+    }
+    
+    // Re-throw other errors
+    throw error;
+  }
+};
+
+export const getHint = async (language, exerciseId, errorMessage, failedTests) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/hint`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        code,
         language,
+        exercise_id: exerciseId,
         error_message: errorMessage,
+        failed_tests: failedTests,
       }),
     });
 

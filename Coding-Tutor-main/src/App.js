@@ -1,21 +1,22 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import './App.css';
 import NavBar from './components/Navigation/NavBar';
 import CodeEditor from './components/Editor/CodeEditor';
+import ExerciseSelector from './components/Editor/ExerciseSelector';
 import ResizableTerminal from './components/Output/ResizableTerminal';
 import Dashboard from './components/Dashboard/Dashboard';
-import { WebSocketExecutionService } from './services/websocketService';
-import { runCode } from './services/api';
+import HintButton from './components/Controls/HintButton';
+import InputArea from './components/Controls/InputArea';
+import { runCode, getHint } from './services/api';
 
 function App() {
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('c');
+  const [exerciseId, setExerciseId] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const [hints, setHints] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   const [currentView, setCurrentView] = useState('editor');
-  const [executionTime, setExecutionTime] = useState(0);
   const [stats, setStats] = useState({
     totalRuns: 0,
     successCount: 0,
@@ -23,59 +24,15 @@ function App() {
     hintsRequested: 0,
   });
   
-  // New state for redesigned UI
-  const [terminalVisible, setTerminalVisible] = useState(false);
+  // Lab practice mode state
+  const [terminalVisible, setTerminalVisible] = useState(true);
   const [terminalOutput, setTerminalOutput] = useState('');
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [waitingForInput, setWaitingForInput] = useState(false);
-  const [inputPrompt, setInputPrompt] = useState('');
+  const [hintAvailable, setHintAvailable] = useState(false);
+  const [hintContent, setHintContent] = useState('');
+  const [isLoadingHint, setIsLoadingHint] = useState(false);
+  const [lastEvaluation, setLastEvaluation] = useState(null);
+  const [userInput, setUserInput] = useState('');
   const editorRef = useRef(null);
-  const wsServiceRef = useRef(null);
-
-  // Initialize WebSocket service
-  useEffect(() => {
-    const wsService = new WebSocketExecutionService();
-    
-    const onOutput = (output) => {
-      setTerminalOutput(prev => prev + output);
-      setTerminalVisible(true);
-    };
-    
-    const onError = (error) => {
-      setTerminalOutput(prev => prev + '\n[ERROR] ' + error + '\n');
-      setTerminalVisible(true);
-      setError(error);
-    };
-    
-    const onInputRequired = (prompt) => {
-      setWaitingForInput(true);
-      setInputPrompt(prompt || '> ');
-    };
-    
-    const onComplete = (result) => {
-      setIsExecuting(false);
-      setWaitingForInput(false);
-      setIsRunning(false);
-      if (result && result.success !== undefined) {
-        setStats(prev => ({
-          ...prev,
-          totalRuns: prev.totalRuns + 1,
-          successCount: result.success ? prev.successCount + 1 : prev.successCount,
-          errorCount: result.success ? prev.errorCount : prev.errorCount + 1,
-        }));
-      }
-      // Auto-focus input if program is waiting for input (will be handled by terminal component)
-    };
-    
-    wsService.connect(onOutput, onError, onInputRequired, onComplete);
-    wsServiceRef.current = wsService;
-    
-    return () => {
-      if (wsServiceRef.current) {
-        wsServiceRef.current.disconnect();
-      }
-    };
-  }, []);
 
 
   const handleCodeChange = useCallback((newCode) => {
@@ -84,108 +41,119 @@ function App() {
 
   const handleLanguageChange = useCallback((newLanguage) => {
     setLanguage(newLanguage);
+    setExerciseId('');
     setCode('');
     setOutput('');
     setTerminalOutput('');
     setError('');
-    setHints([]);
+    setHintAvailable(false);
+    setLastEvaluation(null);
+    setUserInput('');
   }, []);
 
-  // Terminal execute handler (for WebSocket input)
-  const handleTerminalExecute = useCallback((type, data) => {
-    if (type === 'input' && wsServiceRef.current) {
-      // Echo user input to terminal
-      setTerminalOutput(prev => prev + data + '\n');
-      wsServiceRef.current.sendInput(data);
-      // Keep waitingForInput true - program may need more input
-      // Input field will stay visible as long as isExecuting is true
-    }
+  const handleExerciseChange = useCallback((newExerciseId) => {
+    setExerciseId(newExerciseId);
+    setHintAvailable(false);
+    setLastEvaluation(null);
   }, []);
 
 
-  // Execution handlers
-  const handleRunCode = useCallback(() => {
+  const handleRunCode = useCallback(async () => {
     if (!code.trim()) {
       setTerminalOutput('Error: Please write some code before running.\n');
       setTerminalVisible(true);
       return;
     }
     
-    setTerminalOutput('');
+    if (!exerciseId) {
+      setTerminalOutput('Error: Please select an exercise first.\n\nAvailable exercises should appear in the dropdown when you select a language.\nIf no exercises appear, check:\n1. Backend server is running on http://localhost:8000\n2. Browser console for errors\n3. Network tab for API requests\n');
+      setTerminalVisible(true);
+      return;
+    }
+    
+    setTerminalOutput('Running code...\n');
     setOutput('');
     setError('');
-    setIsExecuting(true);
     setIsRunning(true);
     setTerminalVisible(true);
+    setHintAvailable(false);
+    setLastEvaluation(null);
     
-    // Use WebSocket for interactive execution
-    if (wsServiceRef.current && wsServiceRef.current.isConnected()) {
-      wsServiceRef.current.executeCode(code, language, null, false);
-    } else {
-      // Fallback to regular API if WebSocket not available
-      handleRunCodeAPI();
-    }
-  }, [code, language]);
-
-  const handleRunCodeAPI = async () => {
-    setIsExecuting(true);
-    setIsRunning(true);
     try {
-      const result = await runCode(code, language, null);
-      setTerminalOutput(result.output || '');
-      setError(result.error || '');
-      setOutput(result.output || '');
-      setExecutionTime(result.execution_time || 0);
-      setTerminalVisible(true);
+      const result = await runCode(code, language, exerciseId, userInput);
+      setLastEvaluation(result);
+      
+      let outputText = '';
+      if (result.success) {
+        outputText = result.output || '';
+        if (result.output) {
+          outputText += '\n';
+        }
+      } else {
+        outputText = `Error: ${result.error || 'Execution failed'}\n`;
+        if (result.output) {
+          outputText += `Output:\n${result.output}\n`;
+        }
+      }
+      
+      setTerminalOutput(outputText);
+      setOutput(outputText);
+      
+      // Show hint button if there's an error
+      if (!result.success || result.error) {
+        setHintAvailable(true);
+      } else {
+        setHintAvailable(false);
+        setHintContent('');
+      }
       
       setStats(prev => ({
         ...prev,
         totalRuns: prev.totalRuns + 1,
         successCount: result.success ? prev.successCount + 1 : prev.successCount,
-        errorCount: result.error ? prev.errorCount + 1 : prev.errorCount,
+        errorCount: !result.success ? prev.errorCount + 1 : prev.errorCount,
       }));
     } catch (error) {
       setTerminalOutput(`Error: ${error.message}\n`);
       setError(error.message);
-      setTerminalVisible(true);
+      setHintAvailable(false);
     } finally {
-      setIsExecuting(false);
       setIsRunning(false);
     }
-  };
+  }, [code, language, exerciseId]);
 
   const handleCompileOnly = useCallback(() => {
-    if (!code.trim()) {
-      setTerminalOutput('Error: Please write some code before compiling.\n');
-      setTerminalVisible(true);
-      return;
-    }
-    
-    // Only compile for languages that need it
-    if (language === 'python') {
-      setTerminalOutput('Python is an interpreted language - no compilation needed.\n');
-      setTerminalVisible(true);
-      return;
-    }
-    
-    setTerminalOutput('');
-    setOutput('');
-    setError('');
-    setIsExecuting(true);
+    setTerminalOutput('Compile-only mode not available. Use Run to execute code.\n');
     setTerminalVisible(true);
-    
-    // Use WebSocket for compile-only
-    if (wsServiceRef.current && wsServiceRef.current.isConnected()) {
-      wsServiceRef.current.executeCode(code, language, null, true);
-    } else {
-      setTerminalOutput('Error: WebSocket not connected. Please try again.\n');
-      setIsExecuting(false);
-    }
-  }, [code, language]);
+  }, []);
 
   const handleCompileAndRun = useCallback(() => {
     handleRunCode();
   }, [handleRunCode]);
+
+  const handleHintRequest = useCallback(async () => {
+    if (!lastEvaluation || !exerciseId) {
+      return;
+    }
+    
+    setIsLoadingHint(true);
+    try {
+      const errorMessage = lastEvaluation.error_type 
+        ? `${lastEvaluation.error_type}: ${lastEvaluation.error || 'Execution failed'}`
+        : `Error: ${lastEvaluation.error || 'Execution failed'}`;
+      
+      const result = await getHint(language, exerciseId, errorMessage, '');
+      setHintContent(result.hint);
+      setStats(prev => ({
+        ...prev,
+        hintsRequested: prev.hintsRequested + 1,
+      }));
+    } catch (error) {
+      setHintContent(`Error getting hint: ${error.message}`);
+    } finally {
+      setIsLoadingHint(false);
+    }
+  }, [lastEvaluation, language, exerciseId]);
 
   // Terminal handlers
   const handleTerminalToggle = useCallback(() => {
@@ -197,6 +165,8 @@ function App() {
       <NavBar
         language={language}
         onLanguageChange={handleLanguageChange}
+        exerciseId={exerciseId}
+        onExerciseChange={handleExerciseChange}
         editorRef={editorRef.current}
         onTerminalToggle={handleTerminalToggle}
         terminalVisible={terminalVisible}
@@ -207,14 +177,22 @@ function App() {
 
       {currentView === 'editor' && (
         <div className="app-content">
+          <div className="lab-controls" style={{ padding: '10px', display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'flex-end' }}>
+            {hintAvailable && (
+              <HintButton
+                onHintClick={handleHintRequest}
+                isLoading={isLoadingHint}
+              />
+            )}
+          </div>
           <ResizableTerminal
             visible={terminalVisible}
             onClose={() => setTerminalVisible(false)}
-            output={terminalOutput + (error ? '\n[ERROR] ' + error : '')}
-            onExecute={handleTerminalExecute}
-            isExecuting={isExecuting || isRunning}
-            waitingForInput={waitingForInput}
-            inputPrompt={inputPrompt}
+            output={terminalOutput + (error ? '\n[ERROR] ' + error : '') + (hintContent ? '\n\n--- HINT ---\n' + hintContent : '')}
+            onExecute={() => {}}
+            isExecuting={isRunning}
+            waitingForInput={false}
+            inputPrompt=""
           >
             <div className="editor-view">
               <div className="editor-container">
@@ -223,6 +201,10 @@ function App() {
                   language={language}
                   onChange={handleCodeChange}
                   editorRef={editorRef}
+                />
+                <InputArea
+                  value={userInput}
+                  onChange={setUserInput}
                 />
               </div>
             </div>
