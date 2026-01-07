@@ -1,13 +1,13 @@
 {
-  "total_attempts": 21,
+  "total_attempts": 27,
   "total_errors": 10,
   "total_hints_used": 5,
   "language_counts": {
-    "c": 16,
+    "c": 17,
     "cpp": 0,
-    "python": 5,
+    "python": 10,
     "java": 0
   },
-  "success_count": 12,
+  "success_count": 18,
   "failure_count": 9
 }

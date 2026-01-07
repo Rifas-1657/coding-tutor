@@ -6,11 +6,39 @@ const INITIAL_RETRY_DELAY = 500; // 500ms
 const MAX_RETRY_DELAY = 5000; // 5 seconds
 
 /**
+ * Check if backend is ready by calling health endpoint
+ */
+async function checkBackendHealth() {
+  try {
+    const response = await fetch('http://localhost:8000/api/health', {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      mode: 'cors',
+    });
+    return response.ok && response.status === 200;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
  * Retry fetch with exponential backoff for handling backend startup timing
+ * First checks backend health, then retries on connection failures
  */
 async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES, delay = INITIAL_RETRY_DELAY) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
+      // On first attempt, check backend health first
+      if (attempt === 0) {
+        const isHealthy = await checkBackendHealth();
+        if (!isHealthy && retries > 0) {
+          console.log('Backend not ready, waiting for startup...');
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay = Math.min(delay * 2, MAX_RETRY_DELAY);
+          continue;
+        }
+      }
+      
       const response = await fetch(url, options);
       if (response.ok) {
         return response;
@@ -25,7 +53,7 @@ async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES, delay = 
     } catch (error) {
       // Network errors (ECONNREFUSED, Failed to fetch) - retry
       if (attempt < retries && (error.message.includes('Failed to fetch') || error.message.includes('ECONNREFUSED') || error.name === 'TypeError')) {
-        console.log(`Backend not ready, retrying in ${delay}ms... (attempt ${attempt + 1}/${retries + 1})`);
+        console.log(`Backend connection failed, retrying in ${delay}ms... (attempt ${attempt + 1}/${retries + 1})`);
         await new Promise(resolve => setTimeout(resolve, delay));
         delay = Math.min(delay * 2, MAX_RETRY_DELAY);
         continue;

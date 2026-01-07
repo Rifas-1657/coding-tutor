@@ -1,11 +1,16 @@
 # Docker Sandbox Image for Code Execution
 # This image contains all compilers and interpreters needed for code execution
 # Supports: Python, C, C++, Java
+# Execution Model: Non-interactive - stdin is preloaded before program execution
 
 FROM ubuntu:22.04
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
+
+# Ensure non-interactive execution environment
+# Programs run without TTY - stdin is preloaded via subprocess input
+ENV TERM=dumb
 
 # Install all required compilers and interpreters
 RUN apt-get update && \

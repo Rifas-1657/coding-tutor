@@ -36,13 +36,19 @@ class DockerSandboxRunner:
     def run_code(self, language, code, stdin_data=""):
         """
         Execute code in Docker container using Docker CLI.
-        Non-interactive execution: stdin is closed immediately to prevent hanging.
-        Programs using scanf/cin/input() will receive empty input or EOF.
+        Non-interactive execution model: stdin is preloaded before execution starts.
+        
+        Execution Environment:
+        - Runs in isolated Docker container with no TTY (non-interactive)
+        - Stdin is preloaded with stdin_data before program execution
+        - Programs using scanf/cin/input() read from preloaded stdin buffer
+        - No interactive terminal - input appears "automatic" because it's injected upfront
         
         Args:
             language: One of 'python', 'c', 'cpp', 'java'
             code: Source code to execute
-            stdin_data: Input data for program (optional, defaults to empty)
+            stdin_data: Input data to preload into stdin (optional, defaults to empty)
+                       If provided, this data is available immediately when program reads
         
         Returns:
             dict with keys: success, output, error
@@ -86,19 +92,26 @@ class DockerSandboxRunner:
             with open(os.path.join(temp_dir, filename), "w", encoding="utf-8") as f:
                 f.write(code)
 
-            docker_cmd = [
-                "docker", "run", "-i", "--rm",  # Added "-i" for Interactive
+            # Docker execution configuration
+            # Use -i (interactive) only when stdin_data is provided
+            # This ensures non-interactive execution when no input is needed
+            docker_base_cmd = ["docker", "run", "--rm"]
+            if stdin_data:
+                docker_base_cmd.append("-i")  # Interactive mode for stdin injection
+            docker_base_cmd.extend([
                 "--network", "none",
                 "--memory", "128m",
                 "--cpus", "0.5",
                 "-v", f"{temp_dir}:/sandbox",
                 self.SANDBOX_IMAGE,
                 "sh", "-c", run_cmd
-            ]
+            ])
 
+            # Execute in non-interactive Docker container
+            # stdin_data is injected via subprocess input parameter (not TTY)
             result = subprocess.run(
-                docker_cmd,
-                input=stdin_data if stdin_data else "",  # This sends the student's input to Docker
+                docker_base_cmd,
+                input=stdin_data if stdin_data else "",  # Preload stdin data before execution
                 capture_output=True,
                 text=True,
                 timeout=self.TIMEOUT,

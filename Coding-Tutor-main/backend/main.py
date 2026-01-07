@@ -31,12 +31,14 @@ async def root():
 
 @app.get("/health")
 async def health_check():
+    """Health check endpoint for service availability."""
     return {"status": "ok", "message": "Backend is running"}
 
 
 @app.get("/api/health")
 async def api_health_check():
-    return {"status": "ok", "message": "API is running"}
+    """API health check endpoint for frontend startup timing."""
+    return {"status": "ok", "message": "API is running", "ready": True}
 
 
 @app.get("/favicon.ico")
