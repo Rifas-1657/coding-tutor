@@ -1,9 +1,44 @@
 const API_BASE_URL = 'http://localhost:8000/api';
 
+// Retry configuration for backend startup timing
+const MAX_RETRIES = 5;
+const INITIAL_RETRY_DELAY = 500; // 500ms
+const MAX_RETRY_DELAY = 5000; // 5 seconds
+
+/**
+ * Retry fetch with exponential backoff for handling backend startup timing
+ */
+async function fetchWithRetry(url, options = {}, retries = MAX_RETRIES, delay = INITIAL_RETRY_DELAY) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok) {
+        return response;
+      }
+      // If not the last attempt and it's a connection error, retry
+      if (attempt < retries && (response.status === 0 || response.status >= 500)) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay = Math.min(delay * 2, MAX_RETRY_DELAY);
+        continue;
+      }
+      return response;
+    } catch (error) {
+      // Network errors (ECONNREFUSED, Failed to fetch) - retry
+      if (attempt < retries && (error.message.includes('Failed to fetch') || error.message.includes('ECONNREFUSED') || error.name === 'TypeError')) {
+        console.log(`Backend not ready, retrying in ${delay}ms... (attempt ${attempt + 1}/${retries + 1})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay = Math.min(delay * 2, MAX_RETRY_DELAY);
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 // Sandboxed Practice System API
 export const runCode = async (code, language, exerciseId, userInput = '') => {
   try {
-    const response = await fetch(`${API_BASE_URL}/run`, {
+    const response = await fetchWithRetry(`${API_BASE_URL}/run`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +70,7 @@ export const getExercises = async (language) => {
     const url = `${API_BASE_URL}/exercises/${normalizedLang}`;
     console.log('Fetching exercises from:', url);
     
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -59,10 +94,10 @@ export const getExercises = async (language) => {
     console.error('Error type:', error.constructor.name);
     console.error('Error message:', error.message);
     
-    // Check if it's a network error
+    // After all retries failed, provide helpful error message
     if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.name === 'TypeError') {
-      const errorMsg = 'Cannot connect to backend server.\n\nPlease ensure:\n1. Backend is running: python backend/main.py\n2. Backend is on http://localhost:8000\n3. Check browser console for details';
-      console.error('Network error:', errorMsg);
+      const errorMsg = 'Cannot connect to backend server after multiple retries.\n\nPlease ensure:\n1. Backend is running: python backend/main.py\n2. Backend is on http://localhost:8000\n3. Check browser console for details';
+      console.error('Network error after retries:', errorMsg);
       throw new Error(errorMsg);
     }
     
@@ -73,7 +108,7 @@ export const getExercises = async (language) => {
 
 export const getHint = async (language, exerciseId, errorMessage, failedTests) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/hint`, {
+    const response = await fetchWithRetry(`${API_BASE_URL}/hint`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

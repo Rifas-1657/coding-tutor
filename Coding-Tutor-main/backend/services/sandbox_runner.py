@@ -87,7 +87,7 @@ class DockerSandboxRunner:
                 f.write(code)
 
             docker_cmd = [
-                "docker", "run", "--rm",
+                "docker", "run", "-i", "--rm",  # Added "-i" for Interactive
                 "--network", "none",
                 "--memory", "128m",
                 "--cpus", "0.5",
@@ -98,9 +98,9 @@ class DockerSandboxRunner:
 
             result = subprocess.run(
                 docker_cmd,
-                text=True,
-                input=stdin_data if stdin_data else "",
+                input=stdin_data if stdin_data else "",  # This sends the student's input to Docker
                 capture_output=True,
+                text=True,
                 timeout=self.TIMEOUT,
                 encoding='utf-8',
                 errors='replace'
@@ -110,16 +110,36 @@ class DockerSandboxRunner:
             output = result.stdout.strip() if result.stdout else ""
             error = result.stderr.strip() if result.stderr else ""
             
+            # Check for input-related issues in non-interactive environment
+            # Programs that wait for input will timeout or get EOF
+            input_related_errors = [
+                "EOFError",
+                "EOF",
+                "end of file",
+                "unexpected end of input",
+                "no input available"
+            ]
+            
             # If return code is non-zero, include stderr in error
             if result.returncode != 0:
                 if error:
                     # Check if it's a compilation error
                     if "error:" in error.lower() or "undefined" in error.lower() or "expected" in error.lower():
                         error = f"Compilation Error: {error}"
+                    # Check if it's an input-related error in non-interactive mode
+                    elif any(err in error for err in input_related_errors):
+                        if not stdin_data:
+                            error = f"Input Error: Program expects input but none was provided. Use the 'Program Input' field to provide input values."
+                        else:
+                            error = f"Input Error: {error}"
                     else:
                         error = f"Runtime Error (Exit code {result.returncode}): {error}"
                 else:
-                    error = f"Program exited with error code {result.returncode}"
+                    # Check output for input-related messages
+                    if not stdin_data and any(indicator in output.lower() for indicator in ["input", "enter", "scanf", "cin", "read"]):
+                        error = f"Program expects input but none was provided. Use the 'Program Input' field to provide input values."
+                    else:
+                        error = f"Program exited with error code {result.returncode}"
 
             return {
                 "success": result.returncode == 0,
@@ -128,7 +148,10 @@ class DockerSandboxRunner:
             }
 
         except subprocess.TimeoutExpired:
-            return {"success": False, "error": "Execution timed out after 120 seconds. Your program may be waiting for input, running too long, or stuck in an infinite loop."}
+            # Check if program might be waiting for input
+            if not stdin_data:
+                return {"success": False, "error": "Execution timed out. Your program may be waiting for input. Use the 'Program Input' field to provide input values, or check for infinite loops."}
+            return {"success": False, "error": "Execution timed out after 120 seconds. Your program may be running too long or stuck in an infinite loop."}
 
         except Exception as e:
             return {"success": False, "error": str(e)}

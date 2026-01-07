@@ -120,7 +120,7 @@ function App() {
     } finally {
       setIsRunning(false);
     }
-  }, [code, language, exerciseId]);
+  }, [code, language, exerciseId, userInput]);
 
   const handleCompileOnly = useCallback(() => {
     setTerminalOutput('Compile-only mode not available. Use Run to execute code.\n');

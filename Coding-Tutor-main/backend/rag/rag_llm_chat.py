@@ -4,11 +4,22 @@ RAG-first, LLM-fallback strategy for generating conceptual hints.
 """
 
 import os
-import faiss
-import numpy as np
 import subprocess
-from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Any, Optional
+
+# Try to import optional RAG dependencies
+try:
+    import faiss
+    import numpy as np
+    from sentence_transformers import SentenceTransformer
+    HAS_RAG_DEPS = True
+except ImportError as e:
+    print(f"Warning: RAG dependencies not available: {e}")
+    print("Hint generation will use rule-based hints only.")
+    HAS_RAG_DEPS = False
+    faiss = None
+    np = None
+    SentenceTransformer = None
 
 # Configuration
 EMBED_MODEL = "all-MiniLM-L6-v2"
@@ -20,11 +31,13 @@ INDEX_DIR = os.path.join(BASE_DIR, "indexes")
 META_DIR = os.path.join(BASE_DIR, "metadata")
 
 # Initialize embedder
-try:
-    embedder = SentenceTransformer(EMBED_MODEL)
-except Exception as e:
-    print(f"Warning: Could not load embedding model: {e}")
-    embedder = None
+embedder = None
+if HAS_RAG_DEPS:
+    try:
+        embedder = SentenceTransformer(EMBED_MODEL)
+    except Exception as e:
+        print(f"Warning: Could not load embedding model: {e}")
+        embedder = None
 
 # Cache for loaded indexes
 indexes = {}
@@ -36,6 +49,9 @@ _rag_cache = {}
 
 def load_subject(subject: str) -> bool:
     """Load FAISS index and metadata for a subject."""
+    if not HAS_RAG_DEPS:
+        return False
+    
     if subject in indexes:
         return True
     
@@ -56,7 +72,7 @@ def load_subject(subject: str) -> bool:
 
 def retrieve_notes(subject: str, query: str, k: int = 5) -> List[str]:
     """Retrieve relevant notes from lab manual using RAG with caching."""
-    if not embedder:
+    if not HAS_RAG_DEPS or not embedder:
         return []
     
     if not load_subject(subject):

@@ -29,8 +29,11 @@ const ExerciseSelector = ({ language, exerciseId, onExerciseChange }) => {
       console.error('Error loading exercises:', error);
       console.error('Error details:', error.message, error.stack);
       setExercises([]);
-      // Show error message to user
-      alert(`Error loading exercises: ${error.message}\n\nPlease ensure the backend server is running on http://localhost:8000`);
+      // Don't show alert - retry logic in API will handle backend startup timing
+      // Only show error if backend is truly unavailable after all retries
+      if (error.message.includes('after multiple retries')) {
+        console.warn('Backend unavailable after retries');
+      }
     } finally {
       setLoading(false);
     }
